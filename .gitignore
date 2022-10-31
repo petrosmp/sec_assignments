@@ -1,5 +1,8 @@
 .vscode/
 output.txt
-py_test.py
+input.txt
+deciphered.txt
+public.key
+private.key
 dh_assign_1
 rsa_assign_1
