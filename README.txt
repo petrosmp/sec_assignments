@@ -77,3 +77,10 @@ General Notes:
       satisfies the criteria for choosing e.
     - Both tools were developed with no checks regarding misuse whatsoever, the user is assumed to always
       use them properly.
+    - Both tools use C's int data type for conversions to and from the GMP data types. This means that both
+      tools are subject to limitations regarding the size of the seeds, as neither the seeds nor the keys
+      that are derived from them can exceed the 4-byte limit that C has for integers.
+      This can be quite easily overcome by either using unsigned long long as the primitive data type or
+      by handling I/O directly through the interface that the GMP library provides (gmp_printf, gmp_scanf
+      and friends).
+      This problem was not addressed even though it was identified due to insufficient time.
