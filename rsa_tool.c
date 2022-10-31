@@ -161,6 +161,8 @@ int main(int argc, char *argv[]){
         // math over, store results in files
         FILE *pub_key_file = fopen("public.key", "w");
         FILE *priv_key_file = fopen("private.key", "w");
+        gmp_fprintf(pub_key_file, "%Zd %Zd", gmp_n, gmp_d);
+        gmp_fprintf(priv_key_file, "%Zd %Zd", gmp_n, gmp_e);
 
         // clean up and exit
         mpz_clear(gmp_d);
@@ -175,7 +177,7 @@ int main(int argc, char *argv[]){
 
     } else if (mode == 1) {  // encryption
 
-        // get the key (e, n) from the file and import it to GMP
+        // get the key (n, e) from the file and import it to GMP
         int e, n;
         FILE *keyfile = fopen(keyfile_name, "r");
         fscanf(keyfile, "%d %d", &n, &e);
@@ -220,7 +222,7 @@ int main(int argc, char *argv[]){
 
     } else if (mode == 2){   // decryption
         
-        // get the key (d, n) from the file and import it to GMP
+        // get the key (n, d) from the file and import it to GMP
         int d, n;
         FILE *keyfile = fopen(keyfile_name, "r");
         fscanf(keyfile, "%d %d", &n, &d);
