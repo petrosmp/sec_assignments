@@ -117,7 +117,8 @@ int main(int argc, char *argv[]){
 
         /*
             mpz_probab_prime_p() returns 2 if the number is definitely prime, 1 if the
-            number is probably prime and 0 if the number is definitely not prime (https://gmplib.org/manual/Number-Theoretic-Functions).
+            number is probably prime and 0 if the number is definitely not prime.
+            (https://gmplib.org/manual/Number-Theoretic-Functions)
 
             For this assignment we will only accept definitely prime numbers, since according to
             GMP documentation regarding primality testing, a composite number passing the test
@@ -145,7 +146,6 @@ int main(int argc, char *argv[]){
         mpz_init_set_ui(gmp_one, 1);
         mpz_sub(gmp_p, gmp_p, gmp_one);   // gmp_p --
         mpz_sub(gmp_q, gmp_q, gmp_one);   // gmp_q --
-        gmp_printf("Calculating lambda(n) with (p-1) %Zd and (q-1) %Zd\n", gmp_p, gmp_q);
         mpz_mul(lambda_n, gmp_p, gmp_q);      // lambda(n) = (p-1) * (q-1) (Euler's totient function)
 
         // choose e (e is required to be prime and also < lambda)
@@ -162,14 +162,18 @@ int main(int argc, char *argv[]){
         FILE *pub_key_file = fopen("public.key", "w");
         FILE *priv_key_file = fopen("private.key", "w");
 
-        //gmp_printf("lambda(n): %Zd\nn: %Zd\ne: %Zd\nd: %Zd\n", lambda_n, gmp_n, gmp_e, gmp_d);
-        //gmp_fprintf(pub_key_file, "%Zd %Zd", gmp_n, gmp_d);
-        //gmp_fprintf(priv_key_file, "%Zd %Zd", gmp_n, gmp_e);
+        // clean up and exit
+        mpz_clear(gmp_d);
+        mpz_clear(gmp_e);
+        mpz_clear(lambda_n);
+        mpz_clear(gmp_one);
+        mpz_clear(gmp_n);
+        mpz_clear(gmp_p);
+        mpz_clear(gmp_q);
+        fclose(pub_key_file);
+        fclose(priv_key_file);
 
-        exit(0);
-
-
-    }else if (mode == 1) {  // encryption
+    } else if (mode == 1) {  // encryption
 
         // get the key (e, n) from the file and import it to GMP
         int e, n;
@@ -204,9 +208,15 @@ int main(int argc, char *argv[]){
             fwrite(tmp, 8, 1, outfile);
         }
         
-        // free the variable that was used to store the result and exit
+        // clean up and exit
+        mpz_clear(gmp_e);
+        mpz_clear(gmp_n);
+        mpz_clear(gmp_m);
+        mpz_clear(gmp_res);
+        fclose(infile);
+        fclose(outfile);
+        fclose(keyfile);
         free(tmp);
-        exit(0);
 
     } else if (mode == 2){   // decryption
         
@@ -223,7 +233,7 @@ int main(int argc, char *argv[]){
         mpz_init(gmp_c);
         mpz_init(gmp_res);
         long *tmp =  (long*) malloc(SIZE_OF_CIPHER_BYTE); // variable to store the cipher of each byte.
-        int *c = (int*) malloc(sizeof(int)); 
+        int *c = (int*) malloc(sizeof(int));    // the deciphered cursor
         FILE *infile = fopen(infile_name, "r");
         FILE *outfile = fopen(outfile_name, "w");
 
@@ -239,22 +249,16 @@ int main(int argc, char *argv[]){
             fputc((char)*c, outfile);
         }
 
+        mpz_clear(gmp_d);
+        mpz_clear(gmp_n);
+        mpz_clear(gmp_c);
+        mpz_clear(gmp_res);
+        fclose(infile);
+        fclose(outfile);
+        fclose(keyfile);
         free(c);
         free(tmp);
-
     }
-
-
-    int p = 125;
-    int q = 79;
-
-    mpz_t A,B,C;
-    mpz_init_set_ui(A, 7);
-    mpz_init_set_ui(B, 54);
-    mpz_init_set_ui(C, 18);
-
-    mpz_gcd(A, B, C);
-
 
 }
 
@@ -276,5 +280,8 @@ void calculate_e(mpz_t e, mpz_t lambda){
         }
         mpz_nextprime(e, e);
     }
-}
 
+    mpz_clear(one);
+    mpz_clear(mod);
+    mpz_clear(gcd);
+}
