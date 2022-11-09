@@ -3,7 +3,7 @@ req                     certificate request and generation utility
 -x509                   create a self signed X.509 certificate (instead of requesting it from a CA)
 -nodes                  do not encrypt the private key
 -days 365               used when -x509 is used to specify how long the certificate is valid for (default 30 days)
--newkey rsa:2048        new cert and new private key. Since RSA is specified, 1024 is the length of the key in bits. For other algorithms we can pass a filename containing parameters
+-newkey rsa:2048        new cert and new private key. Since RSA is specified, 2048 is the length of the key in bits. For other algorithms we can pass a filename containing parameters
 -keyout mycert.pem      where the private key will be written
 -out mycert.pem         where the output (the certificate) will be written
 
