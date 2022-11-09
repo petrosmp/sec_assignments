@@ -5,3 +5,7 @@ assignment_1/public.key
 assignment_1/private.key
 assignment_1/dh_assign_1
 assignment_1/rsa_assign_1
+
+assignment_2/mycert.pem
+assignment_2/server
+assignment_2/client
