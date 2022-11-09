@@ -60,6 +60,10 @@ USAGE EXAMPLE:
 
     8082 is the port on which the server is listening on the host machine.
 
+
+
+
+
 IMPORTANT NOTES:
   - In order for the tool to work, the server needs to have a valid SSL
     certificate. A self-signed certificate can be easily obtained by
@@ -72,6 +76,10 @@ IMPORTANT NOTES:
   - Both tools were successfully compiled using gcc (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0
   - The OpenSSL version that everything was developed and tested with was
     OpenSSL 1.1.1f.
+  - Included in this folder is a screenshot of a packet sent from the client to the server
+    during a test, captured with Wireshark. We can see that the application data is encrypted,
+    and looks like noise to a potential attacker. This means that the connection between client
+    and server is indeed secure.
 
 
 
@@ -107,6 +115,8 @@ IMPLEMENTATION NOTES:
     decides that the key is too small)
 
 ** "Skeleton file" refers to the file that was given alongside the project specification.
+
+
 
 
 
