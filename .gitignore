@@ -1,3 +1,5 @@
+.vscode/
+
 assignment_1/output.txt
 assignment_1/input.txt
 assignment_1/deciphered.txt
@@ -11,3 +13,4 @@ assignment_2/server
 assignment_2/client
 
 assignment_3/src_corpus/
+assignment_2/2019030135_assign2.zip
