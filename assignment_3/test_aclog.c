@@ -34,11 +34,8 @@ int main()
 		}
 
 	}
-	/* add your code here */
-	/* ... */
-	/* ... */
-	/* ... */
-	/* ... */
 
+	// try to open a file that we have no permission to (the checksum can not be calculated either)
+	fopen("/etc/sudoers", "r");
 
 }

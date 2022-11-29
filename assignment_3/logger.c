@@ -66,7 +66,7 @@ FILE *fopen(const char *path, const char *mode)  {
 	char *checksum = (char *) malloc(MD5_ASCII_LENGTH);
 	memset(checksum, 0, MD5_ASCII_LENGTH);
 	if (original_fopen_ret == NULL) {
-		char *null_file_checksum = "Non existent file, no checksum";
+		char *null_file_checksum = "Cannot calculate checksum";
 		memcpy(checksum, null_file_checksum, 31);
 	} else {
     	digest(original_fopen_ret, checksum);
