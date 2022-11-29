@@ -1,4 +1,4 @@
-all: logger acmonitor test_aclog rsa yes-hello
+all: logger acmonitor test_aclog rsa yes-hello dict-lib test
 
 logger: logger.c
 	gcc -Wall -fPIC -shared -o logger.so logger.c -lcrypto -ldl -g
@@ -19,3 +19,9 @@ clean:
 	rm -rf logger.so
 	rm -rf test_aclog
 	rm -rf acmonitor
+
+dict-lib: dict.h dict.c
+	gcc -Wall -fPIC -shared -o libdict.so dict.c
+
+test: test.c
+	gcc -L. -Wl,-rpath=. -o test test.c -ldict
