@@ -7,7 +7,9 @@
 #include <unistd.h>
 #include <getopt.h>
 #include "dict.h"
+
 #define MD5_ASCII_LENGTH 33
+#define LOGFILE_NAME "file_logging.log"
 
 struct entry {
 
@@ -170,7 +172,7 @@ int main(int argc, char *argv[]) {
 	if (argc < 2)
 		usage();
 
-	log = fopen("out", "r");
+	log = fopen(LOGFILE_NAME, "r");
 	if (log == NULL) {
 		printf("Error opening log file \"%s\"\n", "./log");
 		return 1;
