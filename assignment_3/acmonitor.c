@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <getopt.h>
 #include "dict.h"
+#define MD5_ASCII_LENGTH 33
 
 struct entry {
 
@@ -85,7 +86,7 @@ void list_unauthorized_accesses(FILE *log) {
 		}
 	}
 
-	// iterate through the dict
+	// iterate through the dict and print
 	dict_item *cur = d->head;
 	for(int i=0; i<d->size; i++) {
 		if (cur->counter > 7) {
@@ -100,9 +101,10 @@ void list_unauthorized_accesses(FILE *log) {
 
 void list_file_modifications(FILE *log, char *file_to_scan) {
 
-char *line = NULL;
+	char *line = NULL;
 	size_t len = 0;
 	int bytes;
+	char lasthash[MD5_ASCII_LENGTH] = {0};
 
 	// initialize dictionary object that will store info as we parse
 	dict *d = init_dict();
@@ -127,24 +129,34 @@ char *line = NULL;
 		// if the file was the file that we are looking for
 		if (strcmp(filename, file_to_scan) == 0) {
 
-			// create entry for UID if it does not already exist
-			dict_item *line_item = dict_get_item(d, uid);
-			if (line_item == NULL) {	// no dict entry exists, create new one
-				line_item = dict_insert(d, uid, NULL, 0);
+			// if the file is first seen or has been modified (short-circuit to avoid segfault)
+			if (strcmp(lasthash, fingerprint) != 0) {
 
-				if (line_item == NULL) {
-					printf("no more entries could be added to the dictionary!\n");
-					exit(-1);
+				// create entry for UID if it does not already exist
+				dict_item *line_item = dict_get_item(d, uid);
+				if (line_item == NULL) {	// no dict entry exists, create new one
+					line_item = dict_insert(d, uid, NULL, 0);
+
+					if (line_item == NULL) {
+						printf("no more entries could be added to the dictionary!\n");
+						exit(-1);
+					}
 				}
-			}
 
-			// update the list of the dict entry with the filename
-			dict_item_add_to_list(line_item, filename);
+				// increment the counter of the UID, indicating one more modification
+				dict_item_inc_counter(line_item);
+			}
 		}
 	}
 
-	return;
+	// iterate through the dict and print
+	dict_item *cur = d->head;
+	for(int i=0; i<d->size; i++) {
+		printf("%d: %d modifications\n", cur->uid, cur->counter);
+		cur = cur->next;
+	}
 
+	return;
 }
 
 
