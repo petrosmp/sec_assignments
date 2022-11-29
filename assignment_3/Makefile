@@ -1,4 +1,4 @@
-all: logger acmonitor test_aclog rsa yes-hello dict-lib test
+all: logger acmonitor test_aclog rsa dict-lib test
 
 logger: logger.c
 	gcc -Wall -fPIC -shared -o logger.so logger.c -lcrypto -ldl -g
