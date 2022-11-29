@@ -59,7 +59,7 @@ NOTES:
       dict.c. This structure is a linked list of so-called dict_items, and the interface
       surrounding it kind of resembles that of Python dictionaries (thus the name) in the
       sense that one can search by a key and get/update a value associated with it, however
-      the implementation varies greatly.
+      there is close to nothing else in common between the two.
     - Modifications were made to the RSA tool developed in assignment 1 (rsa_tool.c) in order to be
       able to handle the case of the output file being the same as the input file successfully. (The
       way that was achieved is by creating a temporary file where the output is written to, the contents
