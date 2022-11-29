@@ -148,6 +148,9 @@ void list_file_modifications(FILE *log, char *file_to_scan) {
 				// increment the counter of the UID, indicating one more modification
 				dict_item_inc_counter(line_item);
 			}
+
+			// update lasthash
+			strcpy(lasthash, fingerprint);
 		}
 	}
 
