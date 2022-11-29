@@ -11,20 +11,6 @@
 #define MD5_ASCII_LENGTH 33
 #define LOGFILE_NAME "file_logging.log"
 
-struct entry {
-
-	int uid; /* user id (positive integer) */
-	int access_type; /* access type values [0-2] */
-	int action_denied; /* is action denied values [0-1] */
-
-	time_t date; /* file access date */
-	time_t time; /* file access time */
-
-	char *file; /* filename (string) */
-	char *fingerprint; /* file fingerprint */
-
-};
-
 void encrypt_logfile();
 void decrypt_logfile();
 
