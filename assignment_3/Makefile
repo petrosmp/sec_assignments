@@ -4,7 +4,7 @@ logger: logger.c
 	gcc -Wall -fPIC -shared -o logger.so logger.c -lcrypto -ldl -g
 
 acmonitor: acmonitor.c 
-	gcc acmonitor.c -o acmonitor
+	gcc -L. -Wl,-rpath=. acmonitor.c -o acmonitor -ldict
 
 test_aclog: test_aclog.c 
 	gcc test_aclog.c -o test_aclog
