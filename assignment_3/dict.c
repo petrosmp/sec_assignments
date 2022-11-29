@@ -175,6 +175,7 @@ dict_item *dict_get_item(dict *d, int UID) {
         if (cur->uid == UID) {
             return cur;
         }
+        cur = cur->next;
     }
 
     return NULL;
