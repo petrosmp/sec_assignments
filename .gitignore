@@ -20,3 +20,4 @@ assignment_3/logger.so
 assignment_3/*.key
 assignment_3/rsa_assign_1
 assignment_3/test_aclog
+assignment_3/libdict.so
