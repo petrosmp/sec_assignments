@@ -38,8 +38,8 @@ COMPILATION / EXECUTION INSTRUCTIONS:
 
     In order to verify that all tools are working as intended run:
         > LD_PRELOAD=./logger.so ./test_aclog
-        > ./acmonitor -i file1 (or file2,3,4,..., check ls)
-        > ./acmonitor -m
+        > ./acmonitor -i file1 (or file2,3,4,..., check ls) (every file was modified twice by the user running the process)
+        > ./acmonitor -m       (the user running the process has been denied access 9 times, since he tried to write on read only files)
 
 
 
