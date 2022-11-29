@@ -1,4 +1,4 @@
-all: logger acmonitor test_aclog rsa dict-lib test
+all: rsa logger dict-lib acmonitor test_aclog  
 
 logger: logger.c
 	gcc -Wall -fPIC -shared -o logger.so logger.c -lcrypto -ldl -g
@@ -15,13 +15,16 @@ run: logger.so test_aclog
 rsa: rsa_tool.c
 	gcc rsa_tool.c -o rsa_assign_1 -lgmp
 
+dict-lib: dict.h dict.c
+	gcc -Wall -fPIC -shared -o libdict.so dict.c
+
 clean:
 	rm -rf logger.so
 	rm -rf test_aclog
 	rm -rf acmonitor
+	rm -rf libdict.so
 
-dict-lib: dict.h dict.c
-	gcc -Wall -fPIC -shared -o libdict.so dict.c
-
-test: test.c
-	gcc -L. -Wl,-rpath=. -o test test.c -ldict
+#-Wl,option
+#           Pass option as an option to the linker.  If option contains commas, it is split into multiple options at the commas.  You can use this syntax to pass an argument
+#           to the option.  For example, -Wl,-Map,output.map passes -Map output.map to the linker.  When using the GNU linker, you can also get the same effect with
+#           -Wl,-Map=output.map.
