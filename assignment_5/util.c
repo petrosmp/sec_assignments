@@ -28,6 +28,7 @@ struct counters *init_counters() {
 	cnts->udp_packets = 0;
 	cnts->udp_bytes = 0;
 	cnts->udp_flows = 0;
+	cnts->retransmissions = 0;
 
 	return cnts;
 }

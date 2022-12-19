@@ -40,6 +40,7 @@ struct counters {
 	int udp_packets;
 	int udp_bytes;
 	int udp_flows;
+	int retransmissions;
 };
 
 /**
@@ -94,12 +95,17 @@ struct ethernet_header {
 
 /* IP header */
 struct ip_header {
-	unsigned int ihl:4;		/* version << 4 | header length >> 2 */
-	unsigned int version:4;		/* version << 4 | header length >> 2 */
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+	unsigned int ihl:4;		/* header length */
+	unsigned int version:4;	/* version */
+#else
+	unsigned int version:4;	/* version */
+	unsigned int ihl:4;		/* header length */
+#endif
 	unsigned int tos:8;		/* type of service */
-	u_short len;	/* total length */
-	u_short id;		/* identification */
-	u_short f_off;	/* fragment offset field */
+	u_short len;			/* total length */
+	u_short id;				/* identification */
+	u_short f_off;			/* fragment offset field */
 
 // possible values for ip_off field
 #define IP_RF 0x8000		/* reserved fragment flag */
@@ -107,11 +113,11 @@ struct ip_header {
 #define IP_MF 0x2000		/* more fragments flag */
 #define IP_OFFMASK 0x1fff	/* mask for fragmenting bits */
 
-	u_char ttl;			/* time to live */
-	u_char protocol;	/* protocol */
-	u_short checksum;	/* checksum */
+	u_char ttl;				/* time to live */
+	u_char protocol;		/* protocol */
+	u_short checksum;		/* checksum */
 	struct in_addr ip_src;
-	struct in_addr ip_dst; /* source and dest address */
+	struct in_addr ip_dst;	/* source and dest address */
 };
 #define IP_HL(ip)		(((ip)->ihl))
 #define IP_V(ip)		(((ip)->version))
