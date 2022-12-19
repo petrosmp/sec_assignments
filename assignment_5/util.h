@@ -6,28 +6,31 @@
 #include <netinet/ether.h>
 #include <ctype.h>
 
-#define NO_MODE 0
-#define LIVE_CAPTURE 1
-#define READ_FROM_FILE 2
-#define MAX_FILTER_LENGTH 1024
-#define MAX_FILENAME_LENGTH 1024
-#define TRUE  1
-#define FALSE 0
-#define MAX_PACKET_LENGTH 65535
-#define ETHERNET_HEADER_LENGTH 14
+#define NO_MODE 0						/* no mode specified */
+#define LIVE_CAPTURE 1					/* live capture mode */
+#define READ_FROM_FILE 2				/* read from savefile mode */
+#define MAX_FILTER_LENGTH 1024			/* max number of characters in a filter */
+#define MAX_FILENAME_LENGTH 1024		/* max number of characters in a filename */
+#define TRUE  1							/* boolean true */
+#define FALSE 0							/* boolean false */
+#define MAX_PACKET_LENGTH 65535			/* maximum bytes in any packet */
+#define ETHERNET_HEADER_LENGTH 14		/* ethernet header size */
 #ifndef ETHER_ADDR_LEN
-	#define ETHER_ADDR_LEN	6
+	#define ETHER_ADDR_LEN	6			/* ethernet address length */
 #endif
-#define IEEE_802_11_HEADER_LENGTH 22
-#define UDP_HEADER_LENGTH 8
-#define UDP_STR "UDP"
-#define TCP_STR "TCP"
-#define NO_PROTOCOL_STR "NOP"
-#define PROTO_STR_LEN 4
-#define MAX_IP_ADDR_SIZE 39
-#define NO_SEQ 0
-#define NO_FILTER -1
+#define IEEE_802_11_HEADER_LENGTH 22	/* WiFi header size */
+#define UDP_HEADER_LENGTH 8				/* UDP header size */
+#define UDP_STR "UDP"					/* UDP string */
+#define TCP_STR "TCP"					/* TCP string */
+#define NO_PROTOCOL_STR "NOP"			/* NO Protocol string */
+#define PROTO_STR_LEN 4					/* Protocol string size */
+#define MAX_IP_ADDR_SIZE 39				/* Maximum characters in an IP address (dots included) */
+#define NO_SEQ 0						/* No sequence number */
+#define NO_FILTER -1					/* No filter provided */
 
+/**
+ * A struct to keep track of the stats while running the program
+*/
 struct counters {
 	int total_packets;
 	int total_flows;
@@ -39,6 +42,12 @@ struct counters {
 	int udp_flows;
 };
 
+/**
+ * A network flow is uniquely represented of the 5 tuple:
+ * 	(src_ip, src_port, dst_ip, dst_port, protocol)
+ * 
+ * The extra field is there to help identify TCP retransmissions.
+*/
 struct net_flow {
 	char *src_ip;
 	char *dst_ip;
@@ -48,17 +57,27 @@ struct net_flow {
     int expected_SEQ;
 };
 
+/**
+ * A node of the network flow linked list
+*/
 struct nf_node {
 	struct net_flow *nf;
 	struct nf_node *next;
 };
 
+/**
+ * The list where all network flows are stored
+*/
 struct nf_list {
 	struct nf_node *head;
 	struct nf_node *last;
 	int size;
 };
 
+/**
+ * A structure that lets us pass arguments to the callback that
+ * handles individual packets.
+*/
 struct args {
 	struct counters *counters;
 	struct nf_list *list;
@@ -131,32 +150,86 @@ struct udp_header {
 	u_short checksum;	/* UDP checksum */
 };
 
+/**
+ * Allocate space for the argument structure
+*/
 struct args *init_args();
 
+/**
+ * Free the space used by the argument structure
+*/
 void free_args(struct args *n);
 
+/**
+ * Initialize the counter structure
+*/
 struct counters *init_counters();
 
+/**
+ * Free the space used by the counter structure
+*/
 void free_counters(struct counters *cnts);
 
+/**
+ * Initialize the structure that represents a network flow
+ * (allocate space in memory and initialize fields).
+*/
 struct net_flow *init_netflow();
 
+/**
+ * Properly free an instance of the network flow structure.
+*/
 void free_netflow(struct net_flow *nf);
 
+/**
+ * Initialize a new node for the network flow linked list
+*/
 struct nf_node *init_nf_node();
 
+/**
+ * Initialize the network flow linked list
+*/
 struct nf_list *init_list();
 
+/**
+ * Free a node from the network flow linked list
+*/
 void free_nf_node(struct nf_node *n);
 
+/**
+ * Insert the given node into the given network flow
+ * linked list
+*/
 void nfl_insert(struct nf_list *l, struct net_flow *nf);
 
+/**
+ * Properly free every node of the given network flow linked
+ * list and then the list
+*/
 void nfl_free(struct nf_list *l);
 
+/**
+ * Search for a network flow with the given attributes in the
+ * given list. If it exists return it, otherwise return null.
+*/
 struct net_flow *nfl_search(struct nf_list *l, char *src_ip, char *dst_ip, int src_port, int dst_port, char *protocol);
 
+/**
+ * Create a new netflow with the given attributes.
+ * 
+ * Calls init_netflow().
+*/
 struct net_flow *create_netflow(char *src_ip, char *dst_ip, int src_port, int dst_port, char *protocol, int seq);
 
+/**
+ * Convert a filter expression in the form "port <portnum>" to
+ * the integer representing the portnum and return it.
+*/
 int filter_expr_to_portnum(char *fexpr);
 
+/**
+ * Print the contents of the network flow linked list.
+ * 
+ * Used for testing and debugging.
+*/
 void nfl_print(struct nf_list *l);
