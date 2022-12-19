@@ -14,6 +14,7 @@ int loop = 1;		/* used for the capture packet loop, global so the signal handler
 pcap_t *handle;		/* the sniffing session handle (base variable) */
 int datalink_type;	/* the type of the data link, global for caching */
 
+// function declarations
 void usage();
 void process_packet(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char * packet); 
 void print_stats(struct counters *cnts);
@@ -44,7 +45,6 @@ void usage() {
 */
 void process_packet(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char * packet) {
 	
-
 	// cast the argument into its real type
 	struct args *a = (struct args *) arg;
 
@@ -53,15 +53,6 @@ void process_packet(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char 
 	struct nf_list *flows = a->list;
 	int filter_port = a->fport;
 	FILE *out = a->out;
-
-
-// TODO delete this
-/* 	fprintf(stderr, "+++++++++++++ arguments +++++++++++++\n");
-	print_stats(cnts);
-	fprintf(stderr, "net flow list size: %d\n", flows->size);
-	fprintf(stderr, "filter_port: %d\n", filter_port);
-	fprintf(stderr, "output stream: %s\n", out==stdout?"stdout":"file");
-	fprintf(stderr, "+++++++++++++++++++++++++++++++++++++\n"); */
 
 	// increment the total packet counter
 	(cnts->total_packets)++;
@@ -80,7 +71,7 @@ void process_packet(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char 
 	char *protocol;
 	char *src_ip_addr = (char*) malloc(MAX_ADDR_LEN);
 	char *dst_ip_addr = (char*) malloc(MAX_ADDR_LEN);
-	//int tcp_retransmit;
+	int tcp_retransmit = FALSE;
 	struct net_flow *nf = NULL;
 
 	/**
@@ -105,8 +96,7 @@ void process_packet(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char 
 	*/
 
 
-	// determine the offset
-	// (only eth and wlan interfaces are supported, set the offset accordingly)
+	// determine the offset (only eth and wlan interfaces are supported)
 	// TODO check lo
 	if (datalink_type == DLT_EN10MB) {
 		offset = ETHERNET_HEADER_LENGTH;
@@ -118,7 +108,7 @@ void process_packet(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char 
 
 	// ... on to the network layer ...
 	ip_hdr = (struct ip_header*)(packet + offset);
-	ip_header_size = IP_HL(ip_hdr)*4;	// times four because the header is in 4-byte words
+	ip_header_size = IP_HL(ip_hdr)*4;	// times four because the header length is measured in 4-byte words
 
 	// get src and dst address
 	memcpy(src_ip_addr, inet_ntoa(ip_hdr->ip_src), strlen(inet_ntoa((ip_hdr->ip_src))));
@@ -146,6 +136,8 @@ void process_packet(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char 
 			// apply filter
 			if (filter_port != NO_FILTER) {
 				if (src_port != filter_port && dst_port != filter_port){
+					free(src_ip_addr);
+					free(dst_ip_addr);
 					return;
 				}
 			}
@@ -157,7 +149,13 @@ void process_packet(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char 
 			// check if the packet is a retransmission
 			nf = nfl_search(flows, src_ip_addr, dst_ip_addr, src_port, dst_port, protocol); // first see if this is a new flow (if it is, we cannot know if it is a retransmission)
 			if(nf != NULL) {
-				nf->expected_SEQ = ntohl(tcp_hdr->seq) + payload_size;
+
+				if (nf->expected_SEQ > tcp_hdr->seq) {
+					tcp_retransmit = TRUE;
+					cnts->retransmissions ++;
+				}
+
+				nf->expected_SEQ = ntohs(tcp_hdr->seq) + payload_size;
 			} else {
 				// create the new flow
 				nf = create_netflow(src_ip_addr, dst_ip_addr, src_port, dst_port, TCP_STR, ntohl(tcp_hdr->seq) + payload_size);
@@ -215,7 +213,7 @@ void process_packet(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char 
 	fprintf(out, "\n=================================================================== packet #%d ===================================================================\n", cnts->total_packets);
 
 	// ... done with layer processing, print packet info ...
-	fprintf(out, "Protocol: %s over IPv%d\n", protocol, IP_V(ip_hdr));
+	fprintf(out, "Protocol: %s over IPv%d%s\n", protocol, IP_V(ip_hdr), tcp_retransmit ? " (Retransmit) " : "");
 	fprintf(out, "Source IP: %s\n", src_ip_addr);
 	fprintf(out, "Source port: %d\n", src_port);
 	fprintf(out, "Destination IP: %s\n", dst_ip_addr);
@@ -235,8 +233,6 @@ void process_packet(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char 
 			cnts->udp_flows++;
 		}
 		cnts->total_flows++;
-	} else {
-		// if it has, it means the flow been counted, free the new struct
 	}
 
 	fprintf(out, "==================================================================================================================================================\n");
@@ -251,18 +247,18 @@ void process_packet(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char 
  * counters.
 */
 void print_stats(struct counters *cnts) {
-	printf("Total network flows captured: %d\n",cnts->total_flows);
-	printf("TCP network flows captured: %d\n",	cnts->tcp_flows);
-	printf("UDP network flows captured: %d\n",	cnts->udp_flows);
-	printf("Total packets received: %d\n",		cnts->total_packets);
-	printf("TCP packets received: %d\n",		cnts->tcp_packets);
-	printf("UDP packets received: %d\n",		cnts->udp_packets);
-	printf("Total bytes in TCP packets: %d\n",	cnts->tcp_bytes);
-	printf("Total bytes in UDP packets: %d\n",	cnts->udp_bytes);
+	printf("Total network flows captured: %d\n",				cnts->total_flows);
+	printf("TCP network flows captured: %d\n",					cnts->tcp_flows);
+	printf("UDP network flows captured: %d\n",					cnts->udp_flows);
+	printf("Total packets received: %d\n",						cnts->total_packets);
+	printf("TCP packets received: %d (%d retransmissions)\n",	cnts->tcp_packets, cnts->retransmissions);
+	printf("UDP packets received: %d\n",						cnts->udp_packets);
+	printf("Total bytes in TCP packets: %d\n",					cnts->tcp_bytes);
+	printf("Total bytes in UDP packets: %d\n",					cnts->udp_bytes);
 }
 
 /**
- * Designed to handle the SIGINT signal and break the loop of packet
+ * Handle the SIGINT signal and break the loop of packet
  * capturing when in live mode.
 */
 void sig_handler(int signum){
@@ -274,7 +270,7 @@ void sig_handler(int signum){
 
 int main(int argc, char* argv[]) {
     
-
+	// register the signal handler for exiting
 	signal(SIGINT, sig_handler);
 
 	char errbuf[PCAP_ERRBUF_SIZE];
@@ -350,29 +346,12 @@ int main(int argc, char* argv[]) {
 	// parse packets from source
 	int packets = 1;
 	
-	while(loop && packets != 0) {
-		packets = pcap_dispatch(handle, 1, process_packet, (u_char *) arg);
+	while(loop && packets != 0) {	// while not stopped and packets read are not 0
+		packets = pcap_dispatch(handle, 100, process_packet, (u_char *) arg);
 	}
 
-
-	// DONE: open offline
-	// DONE: open live
-	// DONE: retransmit
-	// DONE: print stats
-	// DONE: write to logfile instead of stdout
-	// write README
-	// document stuff
-	// DONE: filters!
-	// IPv6
-	// break loop and stats
-
-	// cleanup
 	print_stats(arg->counters);
 
 	// free the argument structure
-	free_args(arg);	// out is cleaned here too
-
-	// close the sniffing session
-
-
+	free_args(arg);	
 }
