@@ -1,12 +1,12 @@
 general things to be done (asuming structs come in a
 stream-like thing) both in pcap file parsing and in
 live network traffic monitoring
-    > get protocol - decode packet (TCP or UDP?)
-    > skip non TCP or UDP packets
-    > get source and dest IP and port
-    > get header and payload length
-    > find where the payload is in memory (?)
-    > is the packet a retransmit? mark it
+    > IP        |   get protocol - decode packet (TCP or UDP?)
+    > IP        |   skip non TCP or UDP packets
+    > IP & TCP  |   get source and dest IP and port
+    > TCP |   get header and payload length
+    >   |   find where the payload is in memory (?)
+    >   |   is the packet a retransmit? mark it
     > on exit 
         - print number of (only UDP/TCP, since we cannot know
           the details (IPs and ports) for the rest, since we

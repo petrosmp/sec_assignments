@@ -10,7 +10,7 @@ any other link layer headers), which is skipped. We assume that
 the program will only be used on interfaces that support the link
 layer headers that we need (which are?)
 
-
+check if lo is supported
 
 sudo apt install netsniff-ng kai https://man7.org/linux/man-pages/man8/trafgen.8.html gia testing
 
