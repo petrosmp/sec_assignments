@@ -21,3 +21,6 @@ assignment_3/*.key
 assignment_3/rsa_assign_1
 assignment_3/test_aclog
 assignment_3/libdict.so
+
+assignment_6/src_corpus/IPAddressesDifferent.txt
+assignment_6/src_corpus/IPAddressesSame.txt
