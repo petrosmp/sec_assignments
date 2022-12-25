@@ -168,6 +168,7 @@ function adBlock() {
                 ip6tables-restore $filename
             else
                 printf "Error while restoring rules: %s is not a valid IP address.\n" $line
+                printf "The restoration will skip every rule in the following file \"$filename\"\n"
                 printf "Due to this error, restoration might be incomplete. \nManually checking \"$adblockRules\" as well as \"$filename\" is recommended.\n"
                 continue
             fi
