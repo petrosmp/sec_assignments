@@ -166,11 +166,12 @@ function adBlock() {
                 iptables-restore $filename
             elif [[ $line =~ $IPv6RegEx ]]; then
                 ip6tables-restore $filename
+            elif [[ $line = "COMMIT" ]]; then
+                :   # nothing to restore, see README (RESTORE session)
             else
                 printf "Error while restoring rules: %s is not a valid IP address.\n" $line
                 printf "The restoration will skip every rule in the following file \"$filename\"\n"
                 printf "Due to this error, restoration might be incomplete. \nManually checking \"$adblockRules\" as well as \"$filename\" is recommended.\n"
-                continue
             fi
 
             # if this is not the standard file, its a temp file we need to delete
