@@ -27,7 +27,10 @@
 #define MAX_IP_ADDR_SIZE 39				/* Maximum characters in an IP address (dots included) */
 #define NO_SEQ 0						/* No sequence number */
 #define NO_FILTER -1					/* No filter provided */
-
+#define IPV6_PAYLOADLENGTH_OFFSET 4		/* 4 + 8 + 20 bits before the payload length field*/
+#define IPV6_NEXTHEADER_OFFSET 6		/* 4 + 8 + 20 + 16 bits before the next header field */
+#define IPV6_SRCIP_OFFSET 8				/* next header + 16 bits */
+#define IPV6_DSTIP_OFFSET 24			/* source ip + 128 bits */
 /**
  * A struct to keep track of the stats while running the program
 */
