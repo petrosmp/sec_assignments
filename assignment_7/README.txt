@@ -36,7 +36,51 @@ EXPLOIT PROCESS
       of the input are copied to a global variable called big_boy_buffer. This interests us
       because we intend to overwrite the return address that is saved in the stack, which is
       what main() (and not vuln()) will try to return to, so we need to go beyond vuln()'s
-      scope.
+      scope. 
+
+      ^ Note: The last sentence is wrong. We overwrite the return address which should be on
+      the top of the stack frame of the caller function. We jump to the malicious code when
+      vuln() returns, not main(). Therefore we do not really need to go beyond vuln()'s scope,
+      since we can (safely) assume that even after it returns its frame has not been overwritten,
+      the stack pointer has just moved "past" it.
+
+      Picture the stack right before vuln() returns (the addresses are arbitrary, they're just there for reference):
+
+                            ┌───────────────────┐high
+                            │                   │
+        0x00007fffffffdfe8  ├───────────────────┤ <-stack pointer before the "call vuln" instruction
+                            │  return addrress  │ <-this is what we intend to overwrite
+        0x00007fffffffdfe0  ├───────────────────┤ <-stack pointer before the actual jump instruction
+                            │   main()'s %rbp   │
+        0x00007fffffffdfd8  ├───────────────────┤ <-stack pointer right after vuln() takes control, vuln()'s base pointer
+                            │                   │
+                            │                   │
+                            │       buffer      │ <-this is what we intend to overflow
+                            │                   │
+                            │                   │
+        0x00007fffffffdf68  ├───────────────────┤
+                            │         .         │
+                            │         .         │ <-the rest of vuln()'s stack frame  (we don't care what's in here)
+                            │         .         │
+                            ├───────────────────┤ <- vuln()'s stack pointer when vuln() finishes and has to clean up
+                            │                   │
+                            ├───────────────────┤
+                            │                   │
+                            └───────────────────┘low
+      
+      When vuln() ends, 2 instructions will be called to give control back to main(): "leave" and "ret".
+        > "leave" is equivalent to 
+                mov rsp, rbp
+                pop rbp
+          so it will set vuln()'s rsp to vuln()'s rbp (aka 0x00007fffffffdfd8), effectively cleaning up
+          vuln()'s stack frame. Then pop will restore %rbp's value to the address of main()'s stack frame,
+          also moving the stack pointer to 0x00007fffffffdfe0.
+
+        > "ret" will then pop the return address from the stack and jump to it.
+
+      It becomes clear that if we can overwrite the return address, we can control where the program will
+      jump to, giving us the ability to point it towards our malicious code.
+
 
     - We now need to see the exact effect that a "malicious" input can have on the
       program execution. We open GDB and when prompted for input we enter a string with
